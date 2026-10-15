@@ -1,32 +1,41 @@
 # Lynis Security Enhancements
 
-This repository contains two custom Bash audit scripts developed for a Linux security auditing assignment.
+This repository contains two custom Bash audit scripts developed to enhance Linux security auditing using Lynis-related security checks.
 
 ## Scripts
 
 ### 1. Automatic Security Updates Audit
-File: tests_auto_updates_custom.sh
 
-Test ID: CUST-9001
+**File:** `tests_auto_updates_custom.sh`
 
-Checks package installation, effective APT automatic-update settings, the APT upgrade timer, and the unattended-upgrades log file.
+**Test ID:** `CUST-9001`
 
-### 2. ICMP Security Configuration Audit
-File: tests_icmp_security_custom.sh
+Checks whether the unattended-upgrades package is installed, verifies effective APT automatic-update settings, checks the APT upgrade timer configuration, and looks for the unattended-upgrades log file.
 
-Test ID: CUST-9002
+### 2. Automatic Update Service Status Audit
 
-Checks ICMP broadcast protection, bogus ICMP error protection, redirect settings, interface-specific redirect settings, and reverse-path filtering.
+**File:** `tests_update_service_custom.sh`
+
+**Test ID:** `CUST-9003`
+
+Checks the installation of the unattended-upgrades package and examines the enabled and active status of the APT update timers. It also checks whether the automatic upgrade service is reported as failed.
 
 ## Running the Scripts
 
-Run each script using Bash:
+Run the scripts individually using Bash:
 
 ```bash
 sudo bash tests_auto_updates_custom.sh
-sudo bash tests_icmp_security_custom.sh
+```
+
+```bash
+sudo bash tests_update_service_custom.sh
+```
+
 ## Notes
 
-These are standalone Bash audit scripts. They report PASS and WARNING results and provide recommendations. They do not automatically modify system security settings.
-
-Results depend on the system configuration being audited.
+- These are standalone Bash audit scripts.
+- The scripts report PASS and WARNING results based on the checks performed.
+- They do not automatically modify system security settings.
+- Results depend on the Linux distribution, installed packages, service configuration, and system state.
+- A WARNING indicates that a check did not meet its expected condition; it does not necessarily mean that the entire system is insecure.
