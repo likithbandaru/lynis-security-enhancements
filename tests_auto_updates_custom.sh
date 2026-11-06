@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 PASS_COUNT=0
@@ -5,71 +6,58 @@ WARN_COUNT=0
 TOTAL_CHECKS=0
 
 pass() {
-    echo "[PASS] $1"
+    echo "  - $1 [ OK ]"
     PASS_COUNT=$((PASS_COUNT + 1))
     TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
 warn() {
-    echo "[WARNING] $1"
-    echo "Recommendation: $2"
+    echo "  - $1 [ WARNING ]"
     WARN_COUNT=$((WARN_COUNT + 1))
     TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
 }
 
-echo "======================================================="
-echo "       LYNIS CUSTOM AUDIT TEST"
-echo "======================================================="
-echo "Test ID      : CUST-9001"
-echo "Audit Name   : Automatic Security Updates Audit"
-echo "Category     : Operating System Security"
-echo "======================================================="
-
 echo
-echo "[1] Checking unattended-upgrades package..."
+echo "[+] LYNIS CUSTOM AUDIT TEST"
+echo "Test ID     : CUST-9001"
+echo "Audit Name  : Automatic Security Updates Audit"
+echo "=============================================="
+
 if dpkg-query -W -f='${Status}' unattended-upgrades 2>/dev/null | grep -q "install ok installed"; then
-    pass "unattended-upgrades package is installed."
+    pass "Unattended-upgrades package installed"
 else
-    warn "unattended-upgrades package is not installed." "Install it using: sudo apt install unattended-upgrades"
+    warn "Unattended-upgrades package not installed"
 fi
 
-echo
-echo "[2] Checking automatic package-list updates..."
 if apt-config dump 2>/dev/null | grep -Eq 'APT::Periodic::Update-Package-Lists[[:space:]]+"?(1|true)"?;'; then
-    pass "Automatic package-list updates are configured."
+    pass "Automatic package-list updates configured"
 else
-    warn "Automatic package-list updates are not confirmed in the effective APT configuration." "Configure APT::Periodic::Update-Package-Lists to 1."
+    warn "Automatic package-list updates not configured"
 fi
 
-echo
-echo "[3] Checking unattended-upgrade configuration..."
 if apt-config dump 2>/dev/null | grep -Eq 'APT::Periodic::Unattended-Upgrade[[:space:]]+"?(1|true)"?;'; then
-    pass "Automatic unattended upgrades are configured."
+    pass "Automatic unattended upgrades configured"
 else
-    warn "Automatic unattended upgrades are not confirmed in the effective APT configuration." "Configure APT::Periodic::Unattended-Upgrade to 1."
+    warn "Automatic unattended upgrades not configured"
 fi
 
-echo
-echo "[4] Checking apt-daily-upgrade.timer..."
 TIMER_STATE=$(systemctl is-enabled apt-daily-upgrade.timer 2>/dev/null)
+
 if [ "$TIMER_STATE" = "enabled" ] || [ "$TIMER_STATE" = "static" ]; then
-    pass "apt-daily-upgrade.timer is $TIMER_STATE."
+    pass "APT upgrade timer enabled"
 else
-    warn "apt-daily-upgrade.timer is not enabled or static (state: ${TIMER_STATE:-unknown})." "Inspect the timer using: systemctl status apt-daily-upgrade.timer"
+    warn "APT upgrade timer not enabled"
 fi
 
-echo
-echo "[5] Checking unattended-upgrades log..."
 if [ -f /var/log/unattended-upgrades/unattended-upgrades.log ]; then
-    pass "The unattended-upgrades log file exists."
+    pass "Unattended-upgrades log available"
 else
-    warn "The unattended-upgrades log file was not found." "Inspect automatic-upgrade configuration and logs after enabling the feature."
+    warn "Unattended-upgrades log not found"
 fi
 
-echo
-echo "======================================================="
-echo "                 AUDIT SUMMARY"
-echo "======================================================="
+echo "=============================================="
+echo "AUDIT SUMMARY"
+echo "=============================================="
 echo "Total Checks : $TOTAL_CHECKS"
 echo "Passed       : $PASS_COUNT"
 echo "Warnings     : $WARN_COUNT"
@@ -80,4 +68,4 @@ else
     echo "Overall Status : WARNING"
 fi
 
-echo "======================================================="
+echo "=============================================="
